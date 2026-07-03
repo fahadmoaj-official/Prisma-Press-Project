@@ -1,15 +1,16 @@
+import { Role } from "../../../generated/prisma/enums";
 
 
 export interface RegisterUserPayload {
+   // id: string;
    name : string;
    email : string;
    password : string;
    profilePhoto? : string;
    bio? : string;
-   role? : UserRole;
+   role: Role;
 }
 
-enum UserRole {
-   USER = "USER",
-   AUTHOR = "AUTHOR"
-}
+
+
+

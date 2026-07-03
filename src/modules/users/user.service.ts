@@ -25,19 +25,25 @@ const RegisterUserIntoDb = async (payload: RegisterUserPayload) => {
             email: email,
             password: hashedPassword,
             role: role || "USER",
+            profile : {
+                create: {
+                    profilePhoto: profilePhoto,
+                    bio: bio
+                }
+            }
         }
     });
 
 
-    await prisma.profile.create({
-        data: {
-            userId: user.id,
-            profilePhoto: profilePhoto,
-            bio: bio
-        }
-    });
+    // await prisma.profile.create({
+    //     data: {
+    //         userId: user.id,
+    //         profilePhoto: profilePhoto,
+    //         bio: bio
+    //     }
+    // });
 
-    const profile = await prisma.user.findUnique({
+    const CreatedProfile = await prisma.user.findUnique({
         where: {
             id: user.id,
             email: user.email || email,
@@ -50,7 +56,7 @@ const RegisterUserIntoDb = async (payload: RegisterUserPayload) => {
         }
     });
 
-    return profile;
+    return CreatedProfile;
 }
 
 
