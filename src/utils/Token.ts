@@ -42,3 +42,16 @@ export const generateRefreshToken = (user: AccessTokenPayload) => {
     expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
   }as SignOptions);
 };
+
+
+export const verifyAccesstoken = (token: string, secret: string) => {
+  
+
+  try{
+         const verifiedToken = jwt.verify(token, secret) as JwtPayload;
+        return verifiedToken;
+  }catch(error) {
+         throw new Error("Invalid or expired token");
+  }
+
+};

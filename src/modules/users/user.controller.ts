@@ -5,7 +5,8 @@ import httpStatus from "http-status";
 import env from "../../config/env";
 import { userService } from "./user.service";
 import sendResponse from "../../utils/sendResponse";
-
+import jwt from "jsonwebtoken";
+import { verifyAccesstoken } from "../../utils/Token";
 
 const RegisterUser = async (req: Request, res: Response) => {
 try {
@@ -38,8 +39,42 @@ try {
 }
 
 
+const GetMyProfile = async (req: Request, res: Response) => {
+    try {
+
+        const {accessToken} = req.cookies;
+
+      
+
+       const VerifiedToken = verifyAccesstoken(accessToken, env.ACCESS_TOKEN_SECRET);
+
+         const profile = await userService.GetMyProfileFromDb(VerifiedToken.id);
+
+        sendResponse(res,{
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "User profile retrieved successfully",
+            data: {
+                user: profile
+            }
+       })
+
+
+
+
+
+    }catch (error) {
+            sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Internal server error while Retrive get my profile",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+}
+
 
 export const UserController = {
-     RegisterUser
-    
+     RegisterUser,
+     GetMyProfile
 };

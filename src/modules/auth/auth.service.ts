@@ -11,7 +11,7 @@ const LoginUserIntoDb = async (payload: LoginUserData) => {
      const UserExist = await prisma.user.findUnique({
         where: {
             email: email
-        }
+        },
      })
    
      if(!UserExist){
@@ -19,6 +19,9 @@ const LoginUserIntoDb = async (payload: LoginUserData) => {
      }
 
      const isPassowordMatched = await bcrypt.compare(password, UserExist.password);
+
+
+     
      
      if(!isPassowordMatched){
         throw new Error("Password is incorrect : Invalid credentials");
@@ -27,7 +30,13 @@ const LoginUserIntoDb = async (payload: LoginUserData) => {
     const accessToken = generateAccessToken(UserExist);
     const refreshToken = generateRefreshToken(UserExist);
 
-    return { UserExist, accessToken, refreshToken };
+      // Remove password from the response
+     const { password: _, ...userWithoutPassword } = UserExist;
+
+    return { 
+      UserExist : userWithoutPassword, 
+      accessToken, 
+      refreshToken };
 
 
 
