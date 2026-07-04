@@ -3,23 +3,39 @@ import httpStatus from "http-status";
 import sendResponse  from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import { generateAccessToken, generateRefreshToken } from "../../utils/Token";
-
+import  env  from "../../config/env";
 
 const LoginUser = async (req: Request, res: Response) => {
    try {
 
-       const user = await AuthService.LoginUserIntoDb(req.body);
+       const {accessToken, refreshToken,UserExist} = await AuthService.LoginUserIntoDb(req.body);
 
-    //   const accessToken = generateAccessToken(req.body);
-    //   const refreshToken = generateRefreshToken(req.body);
+
+
+       res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge:  1 * 24 * 60 * 60 * 1000, // 1 days in milliseconds
+       });
+
+       res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge:  5 * 24 * 60 * 60 * 1000, // 5 days in milliseconds
+       });
+
+
+
         sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
             message: "User logged in successfully",
             data: { 
-                    user, 
-                    // accessToken: user.accessToken,
-                    // refreshToken: user.refreshToken
+                    user: UserExist,
+                    accessToken,
+                    refreshToken
             },
             
         });
