@@ -15,9 +15,11 @@ model User {
 enum ActiveStatus {
     ACTIVE
     INACTIVE
+    BLOCKED
 }
  enum Role {
     USER
     AUTHOR
+    ADMIN
 }
 

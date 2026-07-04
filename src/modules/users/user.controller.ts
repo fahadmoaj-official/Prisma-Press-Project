@@ -42,13 +42,9 @@ try {
 const GetMyProfile = async (req: Request, res: Response) => {
     try {
 
-        const {accessToken} = req.cookies;
-
       
 
-       const VerifiedToken = verifyAccesstoken(accessToken, env.ACCESS_TOKEN_SECRET);
-
-         const profile = await userService.GetMyProfileFromDb(VerifiedToken.id);
+         const profile = await userService.GetMyProfileFromDb(req.user?.id as string);
 
         sendResponse(res,{
             statusCode: httpStatus.OK,

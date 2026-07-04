@@ -48,10 +48,16 @@ export const verifyAccesstoken = (token: string, secret: string) => {
   
 
   try{
-         const verifiedToken = jwt.verify(token, secret) as JwtPayload;
-        return verifiedToken;
+       const verifiedToken = jwt.verify(token, secret) as JwtPayload;
+        return {
+          success : true,
+          data : verifiedToken
+        };
   }catch(error) {
-         throw new Error("Invalid or expired token");
+         return {
+          success : false,
+          message : error instanceof Error ? error.message : "Unknown error"
+         }
   }
 
 };
