@@ -82,9 +82,52 @@ const GetMyProfileFromDb = async (userId: string) => {
 }
 
 
+const updateMyProfileIntoDb = async ( userId: string,payload:RegisterUserPayload) =>{
+
+     const {name, email,profilePhoto, bio} = payload;
+
+     const isUserExist = await prisma.user.findUnique({
+        where: {
+            email: email,
+        }
+    });
+
+    if(!isUserExist) {
+        throw new Error("User not found");
+    }
+
+    const UpdateProfile =  await prisma.user.update({
+        where: {
+            id:userId
+        },
+        data: {
+            name,
+            email,
+            profile :{
+                update:{
+                    profilePhoto,
+                    bio
+                }
+            },
+        },
+        omit:{
+            password:true
+        },
+        include:{
+            profile:true
+        }
+
+
+        });
+
+        return UpdateProfile
+
+}
+
 
 
 export const userService = {
     RegisterUserIntoDb,
-    GetMyProfileFromDb
+    GetMyProfileFromDb,
+    updateMyProfileIntoDb
 }

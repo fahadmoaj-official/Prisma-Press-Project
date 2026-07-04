@@ -44,7 +44,7 @@ export const generateRefreshToken = (user: AccessTokenPayload) => {
 };
 
 
-export const verifyAccesstoken = (token: string, secret: string) => {
+export const verifyToken = (token: string, secret: string) => {
   
 
   try{
@@ -57,6 +57,7 @@ export const verifyAccesstoken = (token: string, secret: string) => {
          return {
           success : false,
           message : error instanceof Error ? error.message : "Unknown error"
+        
          }
   }
 

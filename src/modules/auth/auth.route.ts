@@ -4,6 +4,7 @@ import { AuthController } from "./auth.controller";
 
 
 router.post("/login", AuthController.LoginUser);
+router.post("/refresh-token", AuthController.RefreshToken);
 
 
 

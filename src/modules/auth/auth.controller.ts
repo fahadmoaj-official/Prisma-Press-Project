@@ -54,6 +54,46 @@ const LoginUser = async (req: Request, res: Response) => {
 }
 
 
+const RefreshToken = async (req: Request, res: Response) =>{
+       
+
+    try {
+
+        const RefreshToken = req.cookies.refreshToken;
+
+        const {NewAccessToken} = await AuthService.RefreshTokenIntoDb(RefreshToken)
+
+
+            res.cookie("accessToken", NewAccessToken, {
+            httpOnly: true,
+            secure: env.NODE_ENV === "production",
+            sameSite: "none",
+            maxAge:  1 * 24 * 60 * 60 * 1000, // 1 days in milliseconds
+        });
+        
+           sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "token Refresh Successfully",
+            data:{
+                accessToken:NewAccessToken
+            }
+        });
+        
+    } catch (error) {
+           sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Internal server error while Refresh Token",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+    
+
+}
+
+
 export const AuthController = {
-    LoginUser
+    LoginUser,
+    RefreshToken
 }

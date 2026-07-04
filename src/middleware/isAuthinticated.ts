@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { verifyAccesstoken } from "../utils/Token";
+import { verifyToken } from "../utils/Token";
 import env from "../config/env";
 import { ActiveStatus, Role } from "../../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
@@ -39,13 +39,13 @@ const isAuthenticated =
         );
       }
 
-      const decoded = verifyAccesstoken(token, env.ACCESS_TOKEN_SECRET);
+      const decoded = verifyToken(token, env.ACCESS_TOKEN_SECRET);
 
       if (!decoded) {
         throw new Error("Invalid access token. Please log in again.");
       }
 
-      if (!decoded.success) { // Check if the verification was unsuccessful check by verifyAccesstoken function
+      if (!decoded.success) { // Check if the verification was unsuccessful check by verifyToken function
         throw new Error(decoded.message);
       }
 
