@@ -8,6 +8,11 @@ model User {
      profile Profile?
      createdAt DateTime @default(now())
      updatedAt DateTime @updatedAt
+
+
+     posts Post[]
+     comments Comment[]
+
      @@map("user")
 }
 
