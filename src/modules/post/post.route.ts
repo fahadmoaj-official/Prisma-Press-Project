@@ -9,19 +9,19 @@ router.get(
   "/",
   isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
   postController.getAllPosts,
-);
+); //✅
  
 router.get("/stats", isAuthenticated(Role.ADMIN), postController.getPostsStats);
 
 router.get(
   "/my-posts",
   isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
-  postController.getMyPosts,
+  postController.getMyPosts, //✅
 );
 
-router.get("/:postId", postController.getPostById);
+router.get("/:postId", postController.getPostById); //✅
 
-router.post("/",isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.CreatePost);
+router.post("/",isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.CreatePost);//✅
 
 
 router.patch("/:postId", isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.updatePost);

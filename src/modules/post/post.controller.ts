@@ -65,12 +65,71 @@ const getAllPosts = async (req: Request, res: Response) => {
 };
 
 
+const getPostById = async (req: Request, res: Response) => {
+      try {
+         
+          const postId = req.params.postId;
+          if (!postId) {
+            throw new Error("Post ID is required");
+          }
+        const result = await postService.getPostByIdIntoDB(postId as string);
 
-const getPostById = async (req: Request, res: Response) => {};
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post retrieved successfully",
+            data: result
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to retrieve GET POST BY ID",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
+
+const getMyPosts  = async (req: Request, res: Response) => {
+       try {
+         
+          const userId = req.user?.id;
+          
+          
+        const result = await postService.getMyPostsIntoDB(userId as string);
+
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post retrieved successfully",
+            data: result
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to retrieve GET MY POSTS",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
+
+
+
 const updatePost = async (req: Request, res: Response) => {};
 const deletePost = async (req: Request, res: Response) => {};
 const getPostsStats = async (req: Request, res: Response) => {};
-const getMyPosts  = async (req: Request, res: Response) => {};
+
 
 export const postController = {
     CreatePost,
