@@ -10,7 +10,7 @@ router.get(
   isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
   postController.getAllPosts,
 ); //✅
- 
+
 router.get("/stats", isAuthenticated(Role.ADMIN), postController.getPostsStats);
 
 router.get(
@@ -21,11 +21,22 @@ router.get(
 
 router.get("/:postId", postController.getPostById); //✅
 
-router.post("/",isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.CreatePost);//✅
+router.post(
+  "/",
+  isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.CreatePost,
+); //✅
 
+router.patch(
+  "/:postId",
+  isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.updatePost,
+); //✅
 
-router.patch("/:postId", isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.updatePost);
-
-router.delete("/:postId", isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), postController.deletePost);
+router.delete(
+  "/:postId",
+  isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.deletePost,
+); //✅
 
 export default router;

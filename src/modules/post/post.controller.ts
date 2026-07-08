@@ -126,8 +126,70 @@ const getMyPosts  = async (req: Request, res: Response) => {
 
 
 
-const updatePost = async (req: Request, res: Response) => {};
-const deletePost = async (req: Request, res: Response) => {};
+const updatePost = async (req: Request, res: Response) => {
+       try {
+         
+        const postId = req.params.postId;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if(!postId ){
+            throw new Error("Post ID is required");
+        }
+        const result = await postService.updatePostIntoDB(req.body, postId as string,userId as string,userRole as string);
+
+       
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post Update successfully",
+            data: result
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to Update post",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
+
+const deletePost = async (req: Request, res: Response) => {
+      try {
+         
+        const postId = req.params.postId;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        if(!postId ){
+            throw new Error("Post ID is required");
+        }
+        const result = await postService.deletePostIntoDB(postId as string,userId as string,userRole as string);
+
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post deleted successfully",
+            
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to delete post",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
 const getPostsStats = async (req: Request, res: Response) => {};
 
 
