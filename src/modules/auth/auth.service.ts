@@ -4,7 +4,6 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "../../utils/Token";
 import env from "../../config/env";
-import { error } from "node:console";
 import { JwtPayload } from "jsonwebtoken";
 
 const LoginUserIntoDb = async (payload: LoginUserData) => {  
