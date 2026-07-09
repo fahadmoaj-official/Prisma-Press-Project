@@ -1,6 +1,7 @@
 import { error } from "node:console";
 import { prisma } from "../../lib/prisma";
 import { IcreatePostPayload,IupdatePostPayload } from "./post.interface";
+import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 
 const createPostIntoDB = async (
   payload: IcreatePostPayload,
@@ -209,7 +210,134 @@ const deletePostIntoDB = async (postId: string,userId: string,userRole: string) 
 };
 
 
-const getPostsStatsIntoDB = async (postData: any) => {};
+const getPostsStatsIntoDB = async () => {
+
+   const transactionResult = await prisma.$transaction(
+      async (tx) =>{
+         // const totalPost = await tx.post.count();
+
+
+         // const totalPuslishedPost = await tx.post.count({
+         //      where:{
+         //           status: PostStatus.PUBLISHED
+         //      }
+         // })
+
+         // const totalDraftPost = await tx.post.count({
+         //      where:{
+         //           status: PostStatus.DRAFT
+         //      }
+         // })
+
+
+         // const totalArchivedPost = await tx.post.count({
+         //      where:{
+         //           status: PostStatus.ARCHIVED
+         //      }
+         // })
+
+         // const totalComments = await tx.comment.count()
+
+
+         // const TotalApprovedComments = await tx.comment.count({
+         //    where :{
+         //        status:CommentStatus.APPROVED
+         //    }
+         // })
+
+         // const TotalRejectedComments = await tx.comment.count({
+         //    where :{
+         //        status:CommentStatus.REJECTED
+         //    }
+         // })
+        
+
+         // const TotalPostViewsAggregate = await tx.post.aggregate({
+         //    _sum : {
+         //       views:true
+         //    }
+         // })
+
+         // const TotalPostViews = TotalPostViewsAggregate._sum.views
+
+         // return {
+         //    totalPost,
+         //    totalPuslishedPost,
+         //    totalDraftPost,
+         //    TotalRejectedComments,
+         //    TotalApprovedComments,
+         //    totalComments,
+         //    totalArchivedPost,
+         //    TotalPostViews
+         // }
+
+
+
+
+         const [
+            totalPost,
+            totalPuslishedPost,
+            totalDraftPost,
+            TotalRejectedComments,
+            TotalApprovedComments,
+            totalComments,
+            totalArchivedPost,
+            TotalPostViews
+         ] = await Promise.all([
+            await tx.post.count(),
+            await tx.post.count({
+              where:{
+                   status: PostStatus.PUBLISHED
+              }
+            }),
+            await tx.post.count({
+              where:{
+                   status: PostStatus.DRAFT
+              }
+            }),
+             await tx.post.count({
+              where:{
+                   status: PostStatus.ARCHIVED
+              }
+            }),
+            await tx.comment.count(),
+            await tx.comment.count({
+            where :{
+                  status:CommentStatus.APPROVED
+               }
+            }),
+            await tx.comment.count({
+            where :{
+                 status:CommentStatus.REJECTED
+               }
+            }),
+            await tx.post.aggregate({
+               _sum : {
+                  views:true
+               }
+            })
+
+           
+
+         ])
+          return {
+            totalPost,
+            totalPuslishedPost,
+            totalDraftPost,
+            TotalRejectedComments,
+            TotalApprovedComments,
+            totalComments,
+            totalArchivedPost,
+            TotalPostViews: TotalPostViews._sum.views
+         }
+
+
+      }
+   )
+
+   return transactionResult;
+
+};
 
 export const postService = {
   createPostIntoDB,

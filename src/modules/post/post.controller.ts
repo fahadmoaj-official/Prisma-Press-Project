@@ -222,7 +222,32 @@ const deletePost = async (req: Request, res: Response) => {
 
      }
 };
-const getPostsStats = async (req: Request, res: Response) => {};
+const getPostsStats = async (req: Request, res: Response) => {
+       try {
+         
+        const result = await postService.getPostsStatsIntoDB()
+
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post Get successfully",
+            data: result
+            
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to Get Post Stats post",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
 
 
 export const postController = {

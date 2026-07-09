@@ -11,7 +11,7 @@ router.get(
   postController.getAllPosts,
 ); //✅
 
-router.get("/stats", isAuthenticated(Role.ADMIN), postController.getPostsStats);
+router.get("/stats", isAuthenticated(Role.ADMIN), postController.getPostsStats); //✅
 
 router.get(
   "/my-posts",
