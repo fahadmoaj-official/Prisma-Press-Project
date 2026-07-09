@@ -7,12 +7,13 @@ const router = Router();
 
 
 // public
-router.get("/author/:authorId", commentController.getCommentsByAuthor); 
-router.get("/:commentId", commentController.getCommentsById); 
+router.get("/author/:authorId", commentController.getCommentsByAuthor);//✅ 
+router.get("/:commentId", commentController.getCommentsById); //✅
 
 
 
-router.post("/",isAuthenticated(Role.ADMIN, Role.USER,Role.AUTHOR), commentController.CreateComment);
+router.post("/",isAuthenticated(Role.ADMIN, Role.USER,Role.AUTHOR), commentController.CreateComment); //✅
+
 router.patch("/:commentId", isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), commentController.UpdateComment);
 
 router.delete("/:commentId", isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR), commentController.DeleteComment);
