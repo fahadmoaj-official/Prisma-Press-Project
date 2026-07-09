@@ -1,3 +1,4 @@
+import { error } from "node:console";
 import { prisma } from "../../lib/prisma";
 import { IcreatePostPayload,IupdatePostPayload } from "./post.interface";
 
@@ -69,6 +70,50 @@ const getPostByIdIntoDB = async (postId: string) => {
   });
 
   return updatedResult;
+};
+const getPostByIdTransIntoDB = async (postId: string) => {
+ 
+    const transactionResult = await prisma.$transaction(
+       async (tx) =>{
+           const post = await tx.post.findUnique({
+
+                  where: {
+                    id: postId,
+                 },
+            })
+
+             if (!post) {
+                  throw new Error("Post not found");
+            }
+
+      
+               
+            const updatedResult = await prisma.post.update({
+                  where: {
+                     id: postId,
+                  },
+                  data: {
+                     views: { increment: 1 },
+                  },
+                  include: {
+                     author: {
+                     omit: {
+                        password: true,
+                        createdAt: true,
+                        updatedAt: true,
+                     },
+                     },
+                     comments: true,
+                  },
+               });
+
+            return updatedResult;
+       }
+    )
+
+    return transactionResult;
+
+  
 };
 
 const getMyPostsIntoDB = async (userId: string) => {
@@ -174,4 +219,5 @@ export const postService = {
   deletePostIntoDB,
   getPostsStatsIntoDB,
   getMyPostsIntoDB,
+  getPostByIdTransIntoDB
 };

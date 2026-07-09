@@ -21,6 +21,8 @@ router.get(
 
 router.get("/:postId", postController.getPostById); //✅
 
+router.get("/trans/:postId", postController.getPostByIdTrans); //✅
+
 router.post(
   "/",
   isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),

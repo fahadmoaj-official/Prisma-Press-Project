@@ -95,6 +95,38 @@ const getPostById = async (req: Request, res: Response) => {
      }
 };
 
+
+const getPostByIdTrans = async (req: Request, res: Response) => {
+      try {
+         
+          const postId = req.params.postId;
+          if (!postId) {
+            throw new Error("Post ID is required");
+          }
+        const result = await postService.getPostByIdTransIntoDB(postId as string);
+
+        sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: "Post retrieved successfully",
+            data: result
+        })
+        
+    } catch (error) {
+        
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message: "Failed to retrieve GET POST BY ID",
+            error: error instanceof Error ? error.message : "Unknown error"
+        })
+
+
+
+     }
+};
+
+
 const getMyPosts  = async (req: Request, res: Response) => {
        try {
          
@@ -200,5 +232,6 @@ export const postController = {
     updatePost,
     deletePost,
     getPostsStats,
-    getMyPosts
+    getMyPosts,
+    getPostByIdTrans
 };
