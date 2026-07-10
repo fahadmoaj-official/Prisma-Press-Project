@@ -41,7 +41,9 @@ const CreatePost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
      try {
-        const result = await postService.GetAllPostsIntoDB();
+        const queryParams = req.query;
+        console.log("queryParams", queryParams);
+        const result = await postService.GetAllPostsIntoDB(queryParams);
 
         sendResponse(res, {
             statusCode: 201,

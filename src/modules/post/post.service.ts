@@ -1,7 +1,10 @@
-import { error } from "node:console";
-import { prisma } from "../../lib/prisma";
-import { IcreatePostPayload,IupdatePostPayload } from "./post.interface";
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { prisma } from "../../lib/prisma";
+import {
+  IcreatePostPayload,
+  IpostQueryParams,
+  IupdatePostPayload,
+} from "./post.interface";
 
 const createPostIntoDB = async (
   payload: IcreatePostPayload,
@@ -21,8 +24,50 @@ const createPostIntoDB = async (
   return result;
 };
 
-const GetAllPostsIntoDB = async () => {
+const GetAllPostsIntoDB = async (query: IpostQueryParams) => {
+  const limit = query.limit ? Number(query.limit) : 5;
+  const page = query.page ? Number(query.page) : 1;
+  const skip = (page - 1) * limit;
+  const sortBy = query.sortBy ? query.sortBy : "createdAt";
+  const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
   const result = await prisma.post.findMany({
+    where: {
+      AND: [
+        //  title
+        query.title ? { title: query.title } : {},
+        //  content
+        query.content ? { content: query.content } : {},
+
+        // searchTerm
+        query.searchTerm
+          ? {
+              OR: [
+                {
+                  title: {
+                    contains: query.searchTerm,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  content: {
+                    contains: query.searchTerm,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            }
+          : {},
+      ],
+    },
+
+    take: limit,
+    skip: skip,
+
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+
     include: {
       author: {
         omit: {
@@ -39,7 +84,6 @@ const GetAllPostsIntoDB = async () => {
 };
 
 const getPostByIdIntoDB = async (postId: string) => {
- 
   const post = await prisma.post.findUnique({
     where: {
       id: postId,
@@ -73,48 +117,40 @@ const getPostByIdIntoDB = async (postId: string) => {
   return updatedResult;
 };
 const getPostByIdTransIntoDB = async (postId: string) => {
- 
-    const transactionResult = await prisma.$transaction(
-       async (tx) =>{
-           const post = await tx.post.findUnique({
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const post = await tx.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
 
-                  where: {
-                    id: postId,
-                 },
-            })
+    if (!post) {
+      throw new Error("Post not found");
+    }
 
-             if (!post) {
-                  throw new Error("Post not found");
-            }
+    const updatedResult = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        views: { increment: 1 },
+      },
+      include: {
+        author: {
+          omit: {
+            password: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        comments: true,
+      },
+    });
 
-      
-               
-            const updatedResult = await prisma.post.update({
-                  where: {
-                     id: postId,
-                  },
-                  data: {
-                     views: { increment: 1 },
-                  },
-                  include: {
-                     author: {
-                     omit: {
-                        password: true,
-                        createdAt: true,
-                        updatedAt: true,
-                     },
-                     },
-                     comments: true,
-                  },
-               });
+    return updatedResult;
+  });
 
-            return updatedResult;
-       }
-    )
-
-    return transactionResult;
-
-  
+  return transactionResult;
 };
 
 const getMyPostsIntoDB = async (userId: string) => {
@@ -132,7 +168,8 @@ const getMyPostsIntoDB = async (userId: string) => {
       },
       comments: true,
 
-      _count: {   //total comments count for each post
+      _count: {
+        //total comments count for each post
         select: {
           comments: true,
         },
@@ -143,200 +180,185 @@ const getMyPostsIntoDB = async (userId: string) => {
   return result;
 };
 
-const updatePostIntoDB = async (payload: IupdatePostPayload,postId: string,userId: string,userRole: string) => {
-   
-       const post = await prisma.post.findUnique({
-            where:{
-                  id: postId
-            }
-       })
+const updatePostIntoDB = async (
+  payload: IupdatePostPayload,
+  postId: string,
+  userId: string,
+  userRole: string,
+) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+  });
 
-       if(!post){
-        throw new Error("Post not found");
-       }
+  if (!post) {
+    throw new Error("Post not found");
+  }
 
-       // Check if the user is the author of the post or an admin
-       if (post.authorId !== userId && userRole !== "ADMIN") {
-        throw new Error("You are not authorized to update this post");
-       }
+  // Check if the user is the author of the post or an admin
+  if (post.authorId !== userId && userRole !== "ADMIN") {
+    throw new Error("You are not authorized to update this post");
+  }
 
-       const UpdatedPost = await prisma.post.update({
-        where:{
-            id: postId
-         },
-         data: {
-            ...payload
-         },
-         include:{
-             author:{
-                  omit:{
-                     password:true, 
-                  }
-             },
-             comments:true,
-         }
-       })
+  const UpdatedPost = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      ...payload,
+    },
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+    },
+  });
 
-       return UpdatedPost;
-
+  return UpdatedPost;
 };
 
+const deletePostIntoDB = async (
+  postId: string,
+  userId: string,
+  userRole: string,
+) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+  });
 
+  if (!post) {
+    throw new Error("Post not found");
+  }
 
-const deletePostIntoDB = async (postId: string,userId: string,userRole: string) => {
-    
-         const post = await prisma.post.findUnique({
-            where:{
-                  id: postId
-            }
-         })
+  // Check if the user is the author of the post or an admin
+  if (post.authorId !== userId && userRole !== "ADMIN") {
+    throw new Error("You are not authorized to delete this post");
+  }
 
-         if(!post){
-          throw new Error("Post not found");
-         }
-
-         // Check if the user is the author of the post or an admin
-         if (post.authorId !== userId && userRole !== "ADMIN") {
-          throw new Error("You are not authorized to delete this post");
-         }
-
-         const deletedPost = await prisma.post.delete({
-            where:{
-                id: postId
-             },
-         })
-
-
+  const deletedPost = await prisma.post.delete({
+    where: {
+      id: postId,
+    },
+  });
 };
-
 
 const getPostsStatsIntoDB = async () => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    // const totalPost = await tx.post.count();
 
-   const transactionResult = await prisma.$transaction(
-      async (tx) =>{
-         // const totalPost = await tx.post.count();
+    // const totalPuslishedPost = await tx.post.count({
+    //      where:{
+    //           status: PostStatus.PUBLISHED
+    //      }
+    // })
 
+    // const totalDraftPost = await tx.post.count({
+    //      where:{
+    //           status: PostStatus.DRAFT
+    //      }
+    // })
 
-         // const totalPuslishedPost = await tx.post.count({
-         //      where:{
-         //           status: PostStatus.PUBLISHED
-         //      }
-         // })
+    // const totalArchivedPost = await tx.post.count({
+    //      where:{
+    //           status: PostStatus.ARCHIVED
+    //      }
+    // })
 
-         // const totalDraftPost = await tx.post.count({
-         //      where:{
-         //           status: PostStatus.DRAFT
-         //      }
-         // })
+    // const totalComments = await tx.comment.count()
 
+    // const TotalApprovedComments = await tx.comment.count({
+    //    where :{
+    //        status:CommentStatus.APPROVED
+    //    }
+    // })
 
-         // const totalArchivedPost = await tx.post.count({
-         //      where:{
-         //           status: PostStatus.ARCHIVED
-         //      }
-         // })
+    // const TotalRejectedComments = await tx.comment.count({
+    //    where :{
+    //        status:CommentStatus.REJECTED
+    //    }
+    // })
 
-         // const totalComments = await tx.comment.count()
+    // const TotalPostViewsAggregate = await tx.post.aggregate({
+    //    _sum : {
+    //       views:true
+    //    }
+    // })
 
+    // const TotalPostViews = TotalPostViewsAggregate._sum.views
 
-         // const TotalApprovedComments = await tx.comment.count({
-         //    where :{
-         //        status:CommentStatus.APPROVED
-         //    }
-         // })
+    // return {
+    //    totalPost,
+    //    totalPuslishedPost,
+    //    totalDraftPost,
+    //    TotalRejectedComments,
+    //    TotalApprovedComments,
+    //    totalComments,
+    //    totalArchivedPost,
+    //    TotalPostViews
+    // }
 
-         // const TotalRejectedComments = await tx.comment.count({
-         //    where :{
-         //        status:CommentStatus.REJECTED
-         //    }
-         // })
-        
+    const [
+      totalPost,
+      totalPuslishedPost,
+      totalDraftPost,
+      TotalRejectedComments,
+      TotalApprovedComments,
+      totalComments,
+      totalArchivedPost,
+      TotalPostViews,
+    ] = await Promise.all([
+      await tx.post.count(),
+      await tx.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+      }),
+      await tx.post.count({
+        where: {
+          status: PostStatus.DRAFT,
+        },
+      }),
+      await tx.post.count({
+        where: {
+          status: PostStatus.ARCHIVED,
+        },
+      }),
+      await tx.comment.count(),
+      await tx.comment.count({
+        where: {
+          status: CommentStatus.APPROVED,
+        },
+      }),
+      await tx.comment.count({
+        where: {
+          status: CommentStatus.REJECTED,
+        },
+      }),
+      await tx.post.aggregate({
+        _sum: {
+          views: true,
+        },
+      }),
+    ]);
+    return {
+      totalPost,
+      totalPuslishedPost,
+      totalDraftPost,
+      TotalRejectedComments,
+      TotalApprovedComments,
+      totalComments,
+      totalArchivedPost,
+      TotalPostViews: TotalPostViews._sum.views,
+    };
+  });
 
-         // const TotalPostViewsAggregate = await tx.post.aggregate({
-         //    _sum : {
-         //       views:true
-         //    }
-         // })
-
-         // const TotalPostViews = TotalPostViewsAggregate._sum.views
-
-         // return {
-         //    totalPost,
-         //    totalPuslishedPost,
-         //    totalDraftPost,
-         //    TotalRejectedComments,
-         //    TotalApprovedComments,
-         //    totalComments,
-         //    totalArchivedPost,
-         //    TotalPostViews
-         // }
-
-
-
-
-         const [
-            totalPost,
-            totalPuslishedPost,
-            totalDraftPost,
-            TotalRejectedComments,
-            TotalApprovedComments,
-            totalComments,
-            totalArchivedPost,
-            TotalPostViews
-         ] = await Promise.all([
-            await tx.post.count(),
-            await tx.post.count({
-              where:{
-                   status: PostStatus.PUBLISHED
-              }
-            }),
-            await tx.post.count({
-              where:{
-                   status: PostStatus.DRAFT
-              }
-            }),
-             await tx.post.count({
-              where:{
-                   status: PostStatus.ARCHIVED
-              }
-            }),
-            await tx.comment.count(),
-            await tx.comment.count({
-            where :{
-                  status:CommentStatus.APPROVED
-               }
-            }),
-            await tx.comment.count({
-            where :{
-                 status:CommentStatus.REJECTED
-               }
-            }),
-            await tx.post.aggregate({
-               _sum : {
-                  views:true
-               }
-            })
-
-           
-
-         ])
-          return {
-            totalPost,
-            totalPuslishedPost,
-            totalDraftPost,
-            TotalRejectedComments,
-            TotalApprovedComments,
-            totalComments,
-            totalArchivedPost,
-            TotalPostViews: TotalPostViews._sum.views
-         }
-
-
-      }
-   )
-
-   return transactionResult;
-
+  return transactionResult;
 };
 
 export const postService = {
@@ -347,5 +369,5 @@ export const postService = {
   deletePostIntoDB,
   getPostsStatsIntoDB,
   getMyPostsIntoDB,
-  getPostByIdTransIntoDB
+  getPostByIdTransIntoDB,
 };
