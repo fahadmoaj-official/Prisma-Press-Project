@@ -14,6 +14,8 @@ const env = {
   NODE_ENV: process.env.NODE_ENV || "development",
   APP_URL: process.env.APP_URL,
   bcryptSaltRounds: process.env.BCRYPT_SALT_ROUNDS! as string,
+  STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID!,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY!,
 };
 
 export default env;

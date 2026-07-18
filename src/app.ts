@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import userRoutes from "./modules/users/user.routes";
 import authRoutes from "./modules/auth/auth.route";
 import commentRoutes from "./modules/comment/comment.route";
+import subscriptionRoutes from "./modules/subscription/subscription.route";
 import postRoutes from "./modules/post/post.route";
 import { notFound } from "./middleware/NotFound";
 import { globalErrorHandler } from "./middleware/GlobalErrorHandler";
@@ -34,6 +35,7 @@ app.use("/api/users",userRoutes);
 app.use("/api/auth",authRoutes);
 app.use("/api/posts",postRoutes);
 app.use("/api/comments",commentRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 
 
