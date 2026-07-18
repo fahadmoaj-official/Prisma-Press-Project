@@ -9,6 +9,8 @@ import userRoutes from "./modules/users/user.routes";
 import authRoutes from "./modules/auth/auth.route";
 import commentRoutes from "./modules/comment/comment.route";
 import postRoutes from "./modules/post/post.route";
+import { notFound } from "./middleware/NotFound";
+import { globalErrorHandler } from "./middleware/GlobalErrorHandler";
 const app = express();
 
 
@@ -35,7 +37,8 @@ app.use("/api/comments",commentRoutes);
 
 
 
-
+app.use(notFound);
+app.use(globalErrorHandler);
 
 
 
