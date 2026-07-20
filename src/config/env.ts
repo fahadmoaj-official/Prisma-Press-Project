@@ -16,6 +16,7 @@ const env = {
   bcryptSaltRounds: process.env.BCRYPT_SALT_ROUNDS! as string,
   STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID!,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY!,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET!,
 };
 
 export default env;

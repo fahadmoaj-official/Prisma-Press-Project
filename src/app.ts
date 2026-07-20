@@ -1,17 +1,15 @@
-import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import env from "./config/env";
 import cors from "cors";
-import httpStatus from "http-status";
-import { prisma } from "./lib/prisma";
-import bcrypt from "bcryptjs";
-import userRoutes from "./modules/users/user.routes";
+import express, { Request, Response } from "express";
+import env from "./config/env";
+import { stripe } from "./lib/stripe";
+import { globalErrorHandler } from "./middleware/GlobalErrorHandler";
+import { notFound } from "./middleware/NotFound";
 import authRoutes from "./modules/auth/auth.route";
 import commentRoutes from "./modules/comment/comment.route";
-import subscriptionRoutes from "./modules/subscription/subscription.route";
 import postRoutes from "./modules/post/post.route";
-import { notFound } from "./middleware/NotFound";
-import { globalErrorHandler } from "./middleware/GlobalErrorHandler";
+import subscriptionRoutes from "./modules/subscription/subscription.route";
+import userRoutes from "./modules/users/user.routes";
 const app = express();
 
 
@@ -20,6 +18,11 @@ app.use(cors({
     origin: env.APP_URL,
     credentials: true,
 }))
+
+
+app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }))
+
+
 
 
 app.use(express.json());
