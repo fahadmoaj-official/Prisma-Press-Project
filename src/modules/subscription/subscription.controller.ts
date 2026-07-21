@@ -26,11 +26,17 @@ const createCheckoutSession = async (req: Request, res: Response) => {
 };
 
 const handleStripeWebhook = async (req: Request, res: Response) => {
+
+  // console.log("Webhook endpoint hit");
+  // console.log("Is Buffer:", Buffer.isBuffer(req.body));
+  // console.log("Body type:", typeof req.body);
+  // console.log("Signature:", req.headers["stripe-signature"]);
   try {
     const event = req.body as Buffer;
     const signature = req.headers["stripe-signature"] as string;
 
-    await subscriptionService.handleStripeWebhook(event, signature);
+
+    await subscriptionService.handleStripeWebhookServices(event, signature);
 
     sendResponse(res, {
       statusCode: 200,

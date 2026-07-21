@@ -1,6 +1,9 @@
+import Stripe from "stripe";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
+import { handelCheckoutComplte } from "./subscription.utils";
+
 
 const createCheckoutSession = async (userId: string) => {
   const transectionResult = await prisma.$transaction(async (tx) => {
@@ -44,7 +47,7 @@ const createCheckoutSession = async (userId: string) => {
       mode: "subscription",
       customer: stripeCustomerId,
       payment_method_types: ["card"],
-      success_url: `https://www.google.com/`,
+      success_url: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ25bZa9p1QYzWD6o3qHFQtqDzKcAFxLfIUeWnTx38qvA&s=10`,
       cancel_url: `https://www.google.com/`,
       metadata: {
         userId: userExist.id,
@@ -57,7 +60,7 @@ const createCheckoutSession = async (userId: string) => {
   return transectionResult;
 };
 
-const handleStripeWebhook = async (payload: Buffer, signature: string) => {
+const handleStripeWebhookServices = async (payload: Buffer, signature: string) => {
   const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
   const event = stripe.webhooks.constructEvent(
     payload,
@@ -65,17 +68,18 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
     endpointSecret,
   );
 
+
   // Handle the event
   switch (event.type) {
     case "checkout.session.completed":
-      // const paymentIntent = event.data.object;
-
-      break;
+      handelCheckoutComplte(event.data.object);
+    
+      break; 
     case "customer.subscription.updated":
       // const paymentMethod = event.data.object;
 
       break;
-
+ 
 
        case "customer.subscription.deleted":
       // const paymentMethod = event.data.object;
@@ -91,7 +95,10 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
 
 };
 
+
+
+
 export const subscriptionService = {
   createCheckoutSession,
-  handleStripeWebhook,
+  handleStripeWebhookServices,
 };

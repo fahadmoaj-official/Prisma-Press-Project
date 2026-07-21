@@ -20,10 +20,9 @@ app.use(cors({
 }))
 
 
-app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }))
 
 
-
+app.use("/api/subscription/webhook", express.raw({ type: 'application/json' }))
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

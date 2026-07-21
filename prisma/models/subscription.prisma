@@ -8,7 +8,8 @@ model subscription {
 
     status SubscriptionStatus @default(ACTIVE)
 
-    // strip relted id
+    // strip subcription id
+    stripeSubscriptionId String @unique
 
     // stripe Customer ID
     stripeCustomerId   String  @unique
