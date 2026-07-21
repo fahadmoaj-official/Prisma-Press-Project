@@ -55,26 +55,22 @@ const getCommentsByAuthorIntoDb = async (authorId: string) => {
   return comments;
 };
 
-const getCommentsByIdIntoDb = async (commentId: string) => {
-  const comment = await prisma.comment.findUnique({
+const getCommentsByPostIdIntoDb = async (postId: string) => {
+  const comments = await prisma.comment.findMany({
     where: {
-      id: commentId,
-    },include:{
-      post: {
-        select: {
-          id: true,
-          title: true,
-          views: true,
-        },
-      }
-    }
+      postId: postId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    
   });
 
-  if (!comment) {
-    throw new Error("Comment not found");
+  if (!comments || comments.length === 0) {
+    throw new Error("No comments found for the given post");
   }
 
-  return comment;
+  return comments;
 };
 
 const UpdateCommentIntoDb = async (
@@ -166,7 +162,7 @@ const ModarateCommentIntoDb = async (commentId: string, status: IModarateComment
 
 export const commentService = {
   getCommentsByAuthorIntoDb,
-  getCommentsByIdIntoDb,
+  getCommentsByPostIdIntoDb,
   CreateCommentIntoDb,
   UpdateCommentIntoDb,
   DeleteCommentIntoDb,

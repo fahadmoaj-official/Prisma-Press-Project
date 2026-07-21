@@ -33,6 +33,7 @@ const GetAllPostsIntoDB = async (query: IpostQueryParams) => {
 
   const result = await prisma.post.findMany({
     where: {
+      isPremium: false,
       AND: [
         //  title
         query.title ? { title: query.title } : {},
@@ -80,13 +81,22 @@ const GetAllPostsIntoDB = async (query: IpostQueryParams) => {
     },
   });
 
-  return result;
+  return {
+    data : result,
+    meta :{
+      page,
+      limit,
+      total : result.length,
+      totalPages : Math.ceil(result.length / limit),
+    }
+  };
 };
 
 const getPostByIdIntoDB = async (postId: string) => {
   const post = await prisma.post.findUnique({
     where: {
       id: postId,
+      isPremium: false,
     },
   });
 
@@ -121,6 +131,7 @@ const getPostByIdTransIntoDB = async (postId: string) => {
     const post = await tx.post.findUnique({
       where: {
         id: postId,
+        isPremium: false,
       },
     });
 

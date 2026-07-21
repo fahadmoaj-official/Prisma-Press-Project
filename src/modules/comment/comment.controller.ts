@@ -58,13 +58,12 @@ const getCommentsByAuthor = async (req: Request, res: Response) => {
     
 };
 
-const getCommentsById = async (req: Request, res: Response) => {
+const getCommentsByPostId = async (req: Request, res: Response) => {
     try {
         
-        const  commentId  = req.params.commentId;
+        const  postId  = req.params.postId;
         
-
-        const result = await commentService.getCommentsByIdIntoDb(commentId as string);
+        const result = await commentService.getCommentsByPostIdIntoDb(postId as string);
 
         sendResponse(res, {
           statusCode: 200,
@@ -166,7 +165,7 @@ const ModarateComment = async (req: Request, res: Response) => {
 
 export const commentController = {
     getCommentsByAuthor,
-    getCommentsById,
+    getCommentsByPostId,
     CreateComment,
     UpdateComment,
     DeleteComment,

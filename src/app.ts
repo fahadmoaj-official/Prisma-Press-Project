@@ -9,6 +9,7 @@ import authRoutes from "./modules/auth/auth.route";
 import commentRoutes from "./modules/comment/comment.route";
 import postRoutes from "./modules/post/post.route";
 import subscriptionRoutes from "./modules/subscription/subscription.route";
+import premiumRoutes from "./modules/premium/premium.route";
 import userRoutes from "./modules/users/user.routes";
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/auth",authRoutes);
 app.use("/api/posts",postRoutes);
 app.use("/api/comments",commentRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/premium", premiumRoutes);
 
 
 

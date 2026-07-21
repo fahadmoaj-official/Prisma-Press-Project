@@ -27,10 +27,7 @@ const createCheckoutSession = async (req: Request, res: Response) => {
 
 const handleStripeWebhook = async (req: Request, res: Response) => {
 
-  // console.log("Webhook endpoint hit");
-  // console.log("Is Buffer:", Buffer.isBuffer(req.body));
-  // console.log("Body type:", typeof req.body);
-  // console.log("Signature:", req.headers["stripe-signature"]);
+
   try {
     const event = req.body as Buffer;
     const signature = req.headers["stripe-signature"] as string;
@@ -54,7 +51,35 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
   }
 };
 
+
+
+const getSubscriptionStatus = async (req: Request, res: Response) => {
+  try {
+         
+    const userId = req.user?.id; 
+
+    const result = await subscriptionService.getSubscriptionStatusSevices(userId as string);
+
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Subscription status retrieved successfully",
+      data: result
+    });
+    
+  } catch (error) {
+    sendResponse(res, {
+      statusCode: 500,
+      success: false,
+      message: "Failed to get subscription status",
+      error: error instanceof Error ? error.message : "Internal Server Error",
+    });
+  }
+}
+
 export const subscriptionController = {
   createCheckoutSession,
   handleStripeWebhook,
+  getSubscriptionStatus
 };

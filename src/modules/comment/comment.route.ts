@@ -8,7 +8,7 @@ const router = Router();
 
 // public
 router.get("/author/:authorId", commentController.getCommentsByAuthor);//✅ 
-router.get("/:commentId", commentController.getCommentsById); //✅
+router.get("/:postId", commentController.getCommentsByPostId); //✅
 
 
 

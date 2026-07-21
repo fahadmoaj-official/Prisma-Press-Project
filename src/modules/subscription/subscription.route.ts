@@ -14,4 +14,8 @@ router.post(
 router.post("/webhook",
    subscriptionController.handleStripeWebhook);
 
+router.get("/status",
+   isAuthenticated(Role.ADMIN, Role.USER, Role.AUTHOR),
+   subscriptionController.getSubscriptionStatus);
+
 export default router;
