@@ -1,9 +1,9 @@
 import Stripe from "stripe";
+import { SubscriptionStatus } from "../../../generated/prisma/enums";
 import env from "../../config/env";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
-import { handelCheckoutComplte } from "./subscription.utils";
-
+import { handelChangeSubscription, handelCheckoutComplte } from "./subscription.utils";
 
 const createCheckoutSession = async (userId: string) => {
   const transectionResult = await prisma.$transaction(async (tx) => {
@@ -60,7 +60,10 @@ const createCheckoutSession = async (userId: string) => {
   return transectionResult;
 };
 
-const handleStripeWebhookServices = async (payload: Buffer, signature: string) => {
+const handleStripeWebhookServices = async (
+  payload: Buffer,
+  signature: string,
+) => {
   const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
   const event = stripe.webhooks.constructEvent(
     payload,
@@ -68,34 +71,26 @@ const handleStripeWebhookServices = async (payload: Buffer, signature: string) =
     endpointSecret,
   );
 
-
   // Handle the event
   switch (event.type) {
     case "checkout.session.completed":
-      handelCheckoutComplte(event.data.object);
-    
-      break; 
-    case "customer.subscription.updated":
-      // const paymentMethod = event.data.object;
+      await handelCheckoutComplte(event.data.object);
 
       break;
- 
+    case "customer.subscription.updated":
+     await handelChangeSubscription(event.data.object);
 
-       case "customer.subscription.deleted":
-      // const paymentMethod = event.data.object;
+      break;
 
+    case "customer.subscription.deleted":
+      await handelChangeSubscription(event.data.object);
       break;
     default:
       // Unexpected event type
       console.log(`No event matched .Unhandled event type ${event.type}.`);
       break;
   }
-
-  
-
 };
-
-
 
 
 export const subscriptionService = {
